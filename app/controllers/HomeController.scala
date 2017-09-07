@@ -1,6 +1,10 @@
 package controllers
 
 import javax.inject._
+
+import actors.TrainActor
+import actors.TrainActor.Tick
+import akka.actor.{ActorRef, ActorSystem}
 import play.api._
 import play.api.mvc._
 
@@ -9,7 +13,11 @@ import play.api.mvc._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) extends AbstractController(cc) {
+
+  private val train: ActorRef = system.actorOf(TrainActor.props)
+
+  train ! Tick(1)
 
   /**
    * Create an Action to render an HTML page.
