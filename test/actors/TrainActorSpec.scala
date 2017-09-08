@@ -91,6 +91,24 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         expectMsg(OnSection(trainSection2, trainSection2.time-1))
       }
     }
+
+    "stop at final destination" should {
+      val trainId = 6
+      val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
+      "return status" in {
+        advanceClockTo(9, dut)
+        dut ! SectionEntered(section2)
+        dut ! GetStatus
+        expectMsg(OnSection(trainSection2, trainSection2.time))
+        advanceClockTo(10, dut)
+        dut ! GetStatus
+        expectMsg(OnSection(trainSection2, trainSection2.time-1))
+        advanceClockTo(15, dut)
+        dut ! GetStatus
+        expectMsg(FinalDestination(trainSection2))
+
+      }
+    }
   }
 
 

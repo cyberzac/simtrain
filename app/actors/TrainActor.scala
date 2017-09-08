@@ -6,11 +6,11 @@ import model.{TrainId, TrainSection}
 
 object TrainActor {
 
-  def props(id:TrainId, start: Time, sections: List[TrainSection]) = Props(new TrainActor(id, start, sections))
+  def props(id: TrainId, start: Time, sections: List[TrainSection]) = Props(new TrainActor(id, start, sections))
 
 }
 
-class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends Actor with ActorLogging {
+class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends Actor with ActorLogging {
   override def receive = {
     case GetStatus ⇒ sender() ! NotStarted
     case Tick(time) ⇒
@@ -32,21 +32,33 @@ class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends 
       log.info(s"$time train:$id: ${section.sectionId} time left $left")
       context.become(onSection(left - 1, section, sections))
       sender() ! Ticked
+
+    case Tick(time) if sections.isEmpty ⇒
+      log.info(s"$time train:$id reached final destination $section")
+      context.become(finalDestination(section))
+      sender() ! Ticked
+
     case Tick(time) ⇒
       val next :: tail = sections
+      log.info(s"$time train:$id: wait for ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
-      log.info(s"train:$id: time to change section ${section.sectionId} -> ${next.sectionId}")
       context.become(waitForEntry(section, next, tail))
       sender() ! Ticked
   }
 
-  def waitForEntry(current: TrainSection, next: TrainSection, tail: List[TrainSection]) : Receive = {
+  def waitForEntry(current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
     case GetStatus => sender() ! WaitingForEntry(current, next)
     case SectionEntered(section) =>
-      log.info(s"train:$id: from ${current.sectionId} to ${next.sectionId}")
-      context.become(onSection(next.time,next,tail))
-    case Tick(time) => sender() ! Ticked
+      log.info(s"train:$id: changing from ${current.sectionId} to ${next.sectionId}")
+      context.become(onSection(next.time, next, tail))
+    case Tick(time) =>
+      log.info(s"$time train:$id: waiting for ${current.sectionId} to ${next.sectionId}")
+      sender() ! Ticked
+  }
 
+  def finalDestination(section: TrainSection): Receive = {
+    case GetStatus ⇒ sender() ! FinalDestination(section)
+    case Tick(_) => sender() ! Ticked
   }
 
 }

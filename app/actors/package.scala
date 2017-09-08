@@ -10,6 +10,7 @@ package object actors {
   sealed trait Status
   case object NotStarted extends Status
   case class OnSection(section:TrainSection, left:Time) extends Status
+  case class FinalDestination(section:TrainSection) extends Status
 
   sealed trait SectionStatus
   case class SectionFreeStatus(section:Section, free:Int) extends SectionStatus
