@@ -25,7 +25,7 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
   implicit val timeout = Timeout(10 seconds)
 
   val trains = Simulator.createTrains(system)
-  for (time ← 0 to 400) {
+  for (time ← 0 to 1000) {
     val tick = Tick(time)
 //    log.info(s"Doing a tick: $tick")
 

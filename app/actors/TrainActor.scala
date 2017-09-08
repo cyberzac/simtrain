@@ -1,6 +1,6 @@
 package actors
 
-import actors.SectionActor.{EnterSection, SectionBlocked, SectionEntered}
+import actors.SectionActor.{EnterSection, ExitSection, SectionBlocked, SectionEntered}
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import model.{TrainId, TrainSection}
 
@@ -55,6 +55,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
 
     case SectionEntered(_) =>
       log.info(s"$time train:$id: go ${current.sectionId} -> ${next.sectionId}")
+      current.sectionActor ! ExitSection(id)
       context.become(onSection(next.time, next, tail))
       ticker ! Ticked(time, id)
 
