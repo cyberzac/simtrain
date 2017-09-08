@@ -1,6 +1,6 @@
 package actors
 
-import actors.SectionActor.{EnterSection, ExitSection, SectionEntered}
+import actors.SectionActor.{EnterSection, ExitSection, SectionBlocked, SectionEntered}
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import model.{Section, TrainId}
 
@@ -14,6 +14,8 @@ object SectionActor {
   case class ExitSection(trainId: TrainId)
 
   case class SectionEntered(section: Section)
+
+  case class SectionBlocked(section: Section)
 }
 
 class SectionActor(section: Section) extends Actor with ActorLogging {
@@ -49,6 +51,7 @@ class SectionActor(section: Section) extends Actor with ActorLogging {
     case EnterSection(trainId) ⇒
       val newQueue = queue enqueue QueuedTrain(trainId, sender())
       log.info(s"section:${section.id} train:$trainId queuing (-${newQueue.size}/${section.capacity})")
+      sender() ! SectionBlocked(section)
       context.become(blocked(newQueue))
 
     case ExitSection(trainId) if queue.isEmpty ⇒

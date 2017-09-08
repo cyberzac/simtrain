@@ -1,7 +1,7 @@
 package actors
 
-import actors.SectionActor.{EnterSection, SectionEntered}
-import akka.actor.{Actor, ActorLogging, Props}
+import actors.SectionActor.{EnterSection, SectionBlocked, SectionEntered}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import model.{TrainId, TrainSection}
 
 object TrainActor {
@@ -42,17 +42,24 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       val next :: tail = sections
       log.info(s"$time train:$id: wait for ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
-      context.become(waitForEntry(section, next, tail))
-      sender() ! Ticked
+      context.become(waitForEntry(sender(), time, section, next, tail))
   }
 
-  def waitForEntry(current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
+  def waitForEntry(ticker:ActorRef, time:Time, current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
     case GetStatus => sender() ! WaitingForEntry(current, next)
-    case SectionEntered(section) =>
-      log.info(s"train:$id: changing from ${current.sectionId} to ${next.sectionId}")
+
+    case SectionEntered(_) =>
+      log.info(s"$time train:$id: changing from ${current.sectionId} to ${next.sectionId}")
       context.become(onSection(next.time, next, tail))
-    case Tick(time) =>
-      log.info(s"$time train:$id: waiting for ${current.sectionId} to ${next.sectionId}")
+      ticker! Ticked
+
+    case SectionBlocked(_) ⇒
+      log.info(s"$time train:$id: blocked ${current.sectionId} to ${next.sectionId}")
+      ticker ! Ticked
+
+    case Tick(newTime) =>
+      log.info(s"$newTime train:$id: waiting for ${current.sectionId} to ${next.sectionId}")
+      context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked
   }
 

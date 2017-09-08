@@ -1,6 +1,6 @@
 package actors
 
-import actors.SectionActor.{EnterSection, ExitSection, SectionEntered}
+import actors.SectionActor.{EnterSection, ExitSection, SectionBlocked, SectionEntered}
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import model.Section
@@ -85,8 +85,11 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
             dut ! EnterSection(train1)
             expectMsg(SectionEntered(section))
             dut ! EnterSection(train2)
+            expectMsg(SectionBlocked(section))
             dut ! EnterSection(train3)
+            expectMsg(SectionBlocked(section))
             dut ! EnterSection(train4)
+            expectMsg(SectionBlocked(section))
             expectNoMsg(500 millis)
             dut ! ExitSection(train1)
             expectMsg(SectionEntered(section))
