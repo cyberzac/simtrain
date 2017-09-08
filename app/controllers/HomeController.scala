@@ -29,7 +29,7 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
 
   private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3,
     List(MTrainSection(2, section1.id, sectionOneActor),
-      MTrainSection(3, section2.id, sectionTwoActor))))
+      M TrainSection(3, section2.id, sectionTwoActor))))
 
   implicit val timeout = Timeout(10 seconds)
 
