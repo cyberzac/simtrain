@@ -2,8 +2,7 @@ package controllers
 
 import javax.inject._
 
-import actors.{Section, TrainActor}
-import actors.TrainActor.Tick
+import actors.{Section, Tick, TrainActor}
 import akka.actor.{ActorRef, ActorSystem}
 import play.api._
 import play.api.mvc._
