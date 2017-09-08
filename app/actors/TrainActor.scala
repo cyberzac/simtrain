@@ -32,7 +32,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
     case GetStatus ⇒ sender() ! OnSection(section, left)
 
     case Tick(time) if left > 0 ⇒
-      log.info(s"$time train:$id: ${section.sectionId} left $left")
+      log.debug(s"$time train:$id: ${section.sectionId} left $left")
       context.become(onSection(left - 1, section, sections))
       sender() ! Ticked(time, id)
 
@@ -43,7 +43,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
 
     case Tick(time) ⇒
       val next :: tail = sections
-      log.info(s"$time train:$id: ask ${section.sectionId} -> ${next.sectionId}")
+      log.debug(s"$time train:$id: ask ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
       context.become(waitForEntry(sender(), time, Some(section), next, tail))
 

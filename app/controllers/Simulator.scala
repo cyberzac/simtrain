@@ -11,7 +11,7 @@ object Simulator {
 
   def createTrains(system:ActorSystem) = {
 
-    val sectionMap = Sections.sections map(s => s.id -> system.actorOf(SectionActor.props(s))) toMap
+    val sectionMap = Sections.sections map(s => s.id -> system.actorOf(SectionActor.props(s.copy(capacity = s.capacity+1)))) toMap
 
     Trains.trains map(t => {
 
