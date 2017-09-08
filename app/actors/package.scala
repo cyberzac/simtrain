@@ -5,6 +5,7 @@ package object actors {
 
   case class Tick(time: Time)
   case object GetStatus
+  case object Ticked
 
   sealed trait Status
   case object NotStarted extends Status

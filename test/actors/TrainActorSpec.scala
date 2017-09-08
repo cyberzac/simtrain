@@ -42,6 +42,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       }
       "reply with NotStarted at time 1" in {
         dut ! Tick(0)
+        expectMsg(Ticked)
         dut ! GetStatus
         expectMsg(NotStarted)
       }
@@ -97,6 +98,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
     while(globalClock < to ){
       globalClock += 1
       dut ! Tick(globalClock)
+      expectMsg(Ticked)
     }
   }
 }
