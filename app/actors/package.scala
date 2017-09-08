@@ -1,3 +1,4 @@
+import model.TrainSection
 
 package object actors {
   type Time = Long
@@ -7,6 +8,6 @@ package object actors {
 
   sealed trait Status
   case object NotStarted extends Status
-  case class OnSection(section:Section, left:Time) extends Status
+  case class OnSection(section:TrainSection, left:Time) extends Status
 
 }
