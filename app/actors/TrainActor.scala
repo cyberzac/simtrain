@@ -37,8 +37,8 @@ class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends 
       context.become(waitForEntry(section, next, tail))
   }
 
-  def waitForEntry(section: TrainSection, next: TrainSection, tail: List[TrainSection]) : Receive = {
-    case GetStatus => sender() ! WaitingForEntry(section, next)
+  def waitForEntry(current: TrainSection, next: TrainSection, tail: List[TrainSection]) : Receive = {
+    case GetStatus => sender() ! WaitingForEntry(current, next)
     case SectionEntered(section) => context.become(onSection(next.time,next,tail))
   }
 

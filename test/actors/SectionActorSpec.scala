@@ -28,7 +28,7 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
 
     "has capacity" should {
       "reply with EnteredSection" in {
-        val section = Section(1, 2)
+        val section = Section("Fln-Hno", 2)
         val dut = system.actorOf(SectionActor.props(section))
         dut ! EnterSection(train1)
         expectMsg(SectionEntered(section))
@@ -39,7 +39,7 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
     }
 
     "Keep track of capacity" in {
-      val section = Section(2, 2)
+      val section = Section("Blg-Orn", 2)
       val dut = system.actorOf(SectionActor.props(section))
 
       dut ! EnterSection(train1)
@@ -79,7 +79,7 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
     }
 
         "is blocked" should {
-          val section = Section(3, 1)
+          val section = Section("Orn-Vhy", 1)
           val dut = system.actorOf(SectionActor.props(section))
           "queue EnterRequest until capacity is available " in {
             dut ! EnterSection(train1)

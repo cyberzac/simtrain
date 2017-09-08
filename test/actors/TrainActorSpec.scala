@@ -18,12 +18,12 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
   val log: Logger = Logger(this.getClass)
   val startTime = 2
   val sectionActor = TestProbe()
-  private val trainSection1 = TrainSection(4, sectionActor.ref)
-  private val trainSection2 = TrainSection(3, sectionActor.ref)
+  val section1 = Section("Orn-Vhy",1)
+  val section2 = Section("Blg-Orn",1)
+  private val trainSection1 = TrainSection(4, section1.id, sectionActor.ref)
+  private val trainSection2 = TrainSection(3, section2.id, sectionActor.ref)
   val trainSections = List(trainSection1, trainSection2)
 
-  val section1 = Section(1,1)
-  val section2 = Section(2,1)
 
   var globalClock = 0
 

@@ -16,10 +16,14 @@ import play.api.mvc._
 class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) extends AbstractController(cc) {
 
   val log: Logger = Logger(this.getClass)
-  val sectionOne = system.actorOf(SectionActor.props(Section(1, 2)))
-  val sectionTwo = system.actorOf(SectionActor.props(Section(2, 2)))
+  private val section1 = Section("Blg-Orn", 2)
+  val sectionOneActor = system.actorOf(SectionActor.props(section1))
+  private val section2 = Section("Orn-Vhy", 2)
+  val sectionTwoActor = system.actorOf(SectionActor.props(section2))
 
-  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3, List(TrainSection(2, sectionOne), TrainSection(1, sectionTwo))))
+  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3,
+    List(TrainSection(2, section1.id, sectionOneActor),
+      TrainSection(1, section2.id, sectionTwoActor))))
 
   for (time ← 0 to 10) {
     val tick = Tick(time)
