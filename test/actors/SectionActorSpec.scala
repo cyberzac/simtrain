@@ -22,7 +22,8 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
 
   val train1 = 1
   val train2 = 2
-  val train3 = 2
+  val train3 = 3
+  val train4 = 4
   "A SectionActor" when {
 
     "has capacity" should {
@@ -77,19 +78,22 @@ class SectionActorSpec(_system: ActorSystem) extends TestKit(_system) with Impli
       }
     }
 
-    //    "is blocked" should {
-    //      val section = Section(3, 1)
-    //      val dut = system.actorOf(SectionActor.props(section))
-    //      "queue EnterRequest until capacity is available " in {
-    //        dut ! EnterSection(train1)
-    //        expectMsg(SectionEntered(section))
-    //        dut ! EnterSection(train2)
-    //        dut ! EnterSection(train3)
-    //        expectNoMsg(500 millis)
-    //        dut ! ExitSection(train1)
-    //        expectMsg(SectionEntered(section))
-    //      }
-    //    }
+        "is blocked" should {
+          val section = Section(3, 1)
+          val dut = system.actorOf(SectionActor.props(section))
+          "queue EnterRequest until capacity is available " in {
+            dut ! EnterSection(train1)
+            expectMsg(SectionEntered(section))
+            dut ! EnterSection(train2)
+            dut ! EnterSection(train3)
+            dut ! EnterSection(train4)
+            expectNoMsg(500 millis)
+            dut ! ExitSection(train1)
+            expectMsg(SectionEntered(section))
+            dut ! ExitSection(train2)
+            expectMsg(SectionEntered(section))
+          }
+        }
 
   }
 
