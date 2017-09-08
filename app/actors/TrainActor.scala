@@ -17,7 +17,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       // log.info(s"train:$id: time is $time, start:$start")
       if (time == start) {
         val section :: tail = sections
-        log.info(s"$time train:$id: departure on ${section.sectionId}")
+        log.info(s"$time train:$id: departure from ${section.sectionId}")
         context.become(onSection(section.time, section, tail))
       }
       sender() ! Ticked
@@ -29,7 +29,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
     case GetStatus ⇒ sender() ! OnSection(section, left)
 
     case Tick(time) if left > 0 ⇒
-      log.info(s"$time train:$id: ${section.sectionId} time left $left")
+      log.info(s"$time train:$id: ${section.sectionId} left $left")
       context.become(onSection(left - 1, section, sections))
       sender() ! Ticked
 
@@ -40,7 +40,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
 
     case Tick(time) ⇒
       val next :: tail = sections
-      log.info(s"$time train:$id: wait for ${section.sectionId} -> ${next.sectionId}")
+      log.info(s"$time train:$id: ask ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
       context.become(waitForEntry(sender(), time, section, next, tail))
   }
@@ -49,7 +49,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
     case GetStatus => sender() ! WaitingForEntry(current, next)
 
     case SectionEntered(_) =>
-      log.info(s"$time train:$id: changing from ${current.sectionId} to ${next.sectionId}")
+      log.info(s"$time train:$id: go ${current.sectionId} to ${next.sectionId}")
       context.become(onSection(next.time, next, tail))
       ticker! Ticked
 
