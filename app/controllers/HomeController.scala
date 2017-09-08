@@ -2,9 +2,9 @@ package controllers
 
 import javax.inject._
 
-import actors.{Tick, TrainActor}
+import actors.{SectionActor, Tick, TrainActor}
 import akka.actor.{ActorRef, ActorSystem}
-import model.TrainSection
+import model.{Section, TrainSection}
 import play.api._
 import play.api.mvc._
 
@@ -16,7 +16,10 @@ import play.api.mvc._
 class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) extends AbstractController(cc) {
 
   val log: Logger = Logger(this.getClass)
-  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3, List(TrainSection(2), TrainSection(1))))
+  val sectionOne = system.actorOf(SectionActor.props(Section(1, 2)))
+  val sectionTwo = system.actorOf(SectionActor.props(Section(2, 2)))
+
+  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3, List(TrainSection(2, sectionOne), TrainSection(1, sectionTwo))))
 
   for (time ← 0 to 10) {
     val tick = Tick(time)

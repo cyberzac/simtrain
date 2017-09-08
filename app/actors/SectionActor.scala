@@ -14,7 +14,6 @@ object SectionActor {
   case class ExitSection(trainId: TrainId)
 
   case class SectionEntered(section: Section)
-
 }
 
 class SectionActor(section: Section) extends Actor with ActorLogging {

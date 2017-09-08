@@ -14,4 +14,5 @@ package object actors {
   case class SectionFreeStatus(section:Section, free:Int) extends SectionStatus
   case class SectionBlockedStatus(section:Section, queue:Int) extends SectionStatus
 
+  case class WaitingForEntry(current: TrainSection, next: TrainSection) extends Status
 }
