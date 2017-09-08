@@ -3,10 +3,10 @@ import akka.actor.ActorRef
 
 package object model {
 
-  type SectionId = Long
+  type SectionId = String
   type TrainId = Long
 
-  case class TrainSection(time: Time, sectionActor: ActorRef)
+  case class TrainSection(time: Time, sectionId:SectionId, sectionActor: ActorRef)
 
   case class Section(id:SectionId, capacity:Int)
 }

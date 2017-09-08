@@ -7,6 +7,11 @@ import akka.actor.{ActorRef, ActorSystem}
 import model.{Section, TrainSection}
 import play.api._
 import play.api.mvc._
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
   * This controller creates an `Action` to handle HTTP requests to the
@@ -16,15 +21,21 @@ import play.api.mvc._
 class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) extends AbstractController(cc) {
 
   val log: Logger = Logger(this.getClass)
-  val sectionOne = system.actorOf(SectionActor.props(Section(1, 2)))
-  val sectionTwo = system.actorOf(SectionActor.props(Section(2, 2)))
+  private val section1 = Section("Blg-Orn", 2)
+  val sectionOneActor = system.actorOf(SectionActor.props(section1))
+  private val section2 = Section("Orn-Vhy", 2)
+  val sectionTwoActor = system.actorOf(SectionActor.props(section2))
 
-  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3, List(TrainSection(2, sectionOne), TrainSection(1, sectionTwo))))
+  private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3,
+    List(TrainSection(2, section1.id, sectionOneActor),
+      TrainSection(3, section2.id, sectionTwoActor))))
+
+  implicit val timeout = Timeout(10 seconds)
 
   for (time ← 0 to 10) {
     val tick = Tick(time)
-    log.info(s"Sending $tick")
-    train ! tick
+    val fTicked = train ? tick
+    Await.ready(fTicked, 10 seconds)
   }
 
   /**
