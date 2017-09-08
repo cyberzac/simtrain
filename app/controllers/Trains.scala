@@ -1,6 +1,5 @@
 package controllers
 
-import model.Train
 
 object Trains {
 
@@ -26,14 +25,14 @@ object Trains {
       TrainSection(6, "BdoSl"), 
       TrainSection(3, "SlSl"), 
       TrainSection(5, "IstSl"), 
-      TrainSection(7, "IstMå"), 
-      TrainSection(8, "JlaMå"), 
+      TrainSection(7, "IstMÃ¥"), 
+      TrainSection(8, "JlaMÃ¥"), 
       TrainSection(6, "BnaJla"), 
       TrainSection(4, "BnaUna"), 
       TrainSection(3, "UUna"), 
       TrainSection(7, "UU"), 
-      TrainSection(3, "SäyU"), 
-      TrainSection(2, "EbySäy"), 
+      TrainSection(3, "SÃ¤yU"), 
+      TrainSection(2, "EbySÃ¤y"), 
       TrainSection(3, "EbyKn"), 
       TrainSection(1, "KnMyn"), 
       TrainSection(7, "ArncMyn"), 
@@ -46,15 +45,26 @@ object Trains {
       TrainSection(1, "HgvR"), 
       TrainSection(2, "HgvKmy"), 
       TrainSection(2, "KmyUdl"), 
-      TrainSection(1, "SoUdl"), 
-      TrainSection(0, "SoTmö"), 
-      TrainSection(1, "KeTmö"), 
+      TrainSection(1, "TmÃ¶Udl"), 
+      TrainSection(0, "SoTmÃ¶"), 
+      TrainSection(1, "KeSo"), 
       TrainSection(4, "CstKe"), 
       TrainSection(945, "CstCst"))
     ),
     Train(14, 465, List(
       TrainSection(3, "CstKe"), 
-      TrainSection(1, "KeTmö"))
+      TrainSection(1, "KeTmÃ¶"), 
+      TrainSection(1, "SoTmÃ¶"), 
+      TrainSection(1, "SoUdl"), 
+      TrainSection(2, "KmyUdl"), 
+      TrainSection(1, "HgvKmy"), 
+      TrainSection(2, "HgvR"), 
+      TrainSection(2, "RUpv"), 
+      TrainSection(1, "SkbyUpv"), 
+      TrainSection(2, "BvrSkby"), 
+      TrainSection(2, "ArneBvr"), 
+      TrainSection(3, "ArncArne"), 
+      TrainSection(2, "ArncArnc"))
     )
   )
 }
