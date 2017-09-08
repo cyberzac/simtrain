@@ -1,11 +1,11 @@
-import model.{Section, TrainSection}
+import model.{Section, TrainId, TrainSection}
 
 package object actors {
   type Time = Long
 
   case class Tick(time: Time)
   case object GetStatus
-  case object Ticked
+  case class Ticked(time:Time, trainId:TrainId)
 
   sealed trait Status
   case object NotStarted extends Status
@@ -16,5 +16,5 @@ package object actors {
   case class SectionFreeStatus(section:Section, free:Int) extends SectionStatus
   case class SectionBlockedStatus(section:Section, queue:Int) extends SectionStatus
 
-  case class WaitingForEntry(current: TrainSection, next: TrainSection) extends Status
+  case class WaitingForEntry(current: Option[TrainSection], next: TrainSection) extends Status
 }
