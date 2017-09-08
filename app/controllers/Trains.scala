@@ -1,6 +1,5 @@
 package controllers
 
-import model.Train
 
 object Trains {
 
@@ -46,15 +45,26 @@ object Trains {
       TrainSection(1, "HgvR"), 
       TrainSection(2, "HgvKmy"), 
       TrainSection(2, "KmyUdl"), 
-      TrainSection(1, "SoUdl"), 
+      TrainSection(1, "TmöUdl"), 
       TrainSection(0, "SoTmö"), 
-      TrainSection(1, "KeTmö"), 
+      TrainSection(1, "KeSo"), 
       TrainSection(4, "CstKe"), 
       TrainSection(945, "CstCst"))
     ),
     Train(14, 465, List(
       TrainSection(3, "CstKe"), 
-      TrainSection(1, "KeTmö"))
+      TrainSection(1, "KeTmö"), 
+      TrainSection(1, "SoTmö"), 
+      TrainSection(1, "SoUdl"), 
+      TrainSection(2, "KmyUdl"), 
+      TrainSection(1, "HgvKmy"), 
+      TrainSection(2, "HgvR"), 
+      TrainSection(2, "RUpv"), 
+      TrainSection(1, "SkbyUpv"), 
+      TrainSection(2, "BvrSkby"), 
+      TrainSection(2, "ArneBvr"), 
+      TrainSection(3, "ArncArne"), 
+      TrainSection(2, "ArncArnc"))
     )
   )
 }

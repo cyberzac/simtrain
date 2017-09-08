@@ -44,10 +44,12 @@ object Sections {
     Section("HgvR", 1),
     Section("HgvKmy", 1),
     Section("KmyUdl", 1),
-    Section("SoUdl", 1),
+    Section("TmöUdl", 1),
     Section("SoTmö", 1),
-    Section("KeTmö", 1),
+    Section("KeSo", 1),
     Section("CstKe", 1),
-    Section("CstCst", 999)
+    Section("CstCst", 999),
+    Section("KeTmö", 1),
+    Section("SoUdl", 1)
   )
 }
