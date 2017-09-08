@@ -80,7 +80,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         dut ! Tick(7)
         sectionActor2.expectMsg(EnterSection(trainId))
         dut ! GetStatus
-        expectMsg(WaitingForEntry(trainSection1, trainSection2))
+        expectMsg(WaitingForEntry(Some(trainSection1), trainSection2))
       }
     }
 
