@@ -34,7 +34,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       sender() ! Ticked
 
     case Tick(time) if sections.isEmpty ⇒
-      log.info(s"$time train:$id reached final destination $section")
+      log.info(s"$time train:$id reached final destination ${section.sectionId}")
       context.become(finalDestination(section))
       sender() ! Ticked
 
