@@ -1,6 +1,6 @@
 package actors
 
-import actors.SectionActor.EnterSection
+import actors.SectionActor.{EnterSection, SectionEntered}
 import akka.actor.{Actor, ActorLogging, Props}
 import model.{TrainId, TrainSection}
 
@@ -37,8 +37,9 @@ class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends 
       context.become(waitForEntry(section, next, tail))
   }
 
-  def waitForEntry(section: TrainSection, next: TrainSection, sections: List[TrainSection]) : Receive = {
+  def waitForEntry(section: TrainSection, next: TrainSection, tail: List[TrainSection]) : Receive = {
     case GetStatus => sender() ! WaitingForEntry(section, next)
+    case SectionEntered(section) => context.become(onSection(next.time,next,tail))
   }
 
 }
