@@ -65,12 +65,12 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       context.become(onSection(next.time, next, tail))
       ticker ! Ticked(time, id)
 
-    case SectionBlocked(_) ⇒
-      log.info(s"$time train:$id: blocked ${toSectionId(current)} -> ${next.sectionId}")
+    case SectionBlocked(section, trains) ⇒
+      log.warning(s"$time train:$id: blocked ${toSectionId(current)} -> ${next.sectionId}, trains:${trains.mkString(",")}")
       ticker ! Ticked(time, id)
 
     case Tick(newTime) =>
-      log.info(s"$newTime train:$id: waiting for ${toSectionId(current)} -> ${next.sectionId}")
+      log.warning(s"$newTime train:$id: waiting ${toSectionId(current)} -> ${next.sectionId}")
       context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked(time, id)
 
