@@ -50,23 +50,25 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
     }
 
     "on section" should {
-      val trainId = 2
-      val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
-      advanceClockTo(4, dut)
 
       "reply with OnSection" in {
+        val trainId = 2
+        val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
+        advanceClockTo(4, dut)
         dut ! GetStatus
         expectMsg(OnSection(trainSection1, 2))
       }
 
       "send enter section" in {
+        val trainId = 3
+        val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
         advanceClockTo(7,dut)
         sectionActor.expectMsg(EnterSection(trainId))
       }
     }
 
     "waiting for section" should {
-      val trainId = 3
+      val trainId = 4
       val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
       "return status" in {
         advanceClockTo(8, dut)
@@ -76,13 +78,16 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
     }
 
     "advance to next section" should {
-      val trainId = 3
+      val trainId = 5
       val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
       "return status" in {
         advanceClockTo(9, dut)
         dut ! SectionEntered(section2)
         dut ! GetStatus
         expectMsg(OnSection(trainSection2, trainSection2.time))
+        advanceClockTo(10, dut)
+        dut ! GetStatus
+        expectMsg(OnSection(trainSection2, trainSection2.time-1))
       }
     }
   }

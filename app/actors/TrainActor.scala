@@ -14,10 +14,10 @@ class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends 
   override def receive = {
     case GetStatus ⇒ sender() ! NotStarted
     case Tick(time) ⇒
-      log.info(s"train:$id: time is $time, start:$start")
+      // log.info(s"train:$id: time is $time, start:$start")
       if (time == start) {
         val section :: tail = sections
-        log.info(s"train:$id: next section $section")
+        // log.info(s"train:$id: next section $section")
         context.become(onSection(section.time, section, tail))
       }
   }
@@ -28,18 +28,20 @@ class TrainActor(id:TrainId, start: Time, sections: List[TrainSection]) extends 
     case GetStatus ⇒ sender() ! OnSection(section, left)
 
     case Tick(time) if left > 0 ⇒
-      log.info(s"train:$id: time left $left")
+      log.info(s"$time train:$id: ${section.sectionId} time left $left")
       context.become(onSection(left - 1, section, sections))
     case Tick(time) ⇒
       val next :: tail = sections
       next.sectionActor ! EnterSection(id)
-      log.info(s"train:$id: time to change section $section -> $next")
+      // log.info(s"train:$id: time to change section $section -> $next")
       context.become(waitForEntry(section, next, tail))
   }
 
   def waitForEntry(current: TrainSection, next: TrainSection, tail: List[TrainSection]) : Receive = {
     case GetStatus => sender() ! WaitingForEntry(current, next)
-    case SectionEntered(section) => context.become(onSection(next.time,next,tail))
+    case SectionEntered(section) =>
+      log.info(s"train:$id: from ${current.sectionId} to ${next.sectionId}")
+      context.become(onSection(next.time,next,tail))
   }
 
 }
