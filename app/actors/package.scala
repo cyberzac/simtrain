@@ -1,11 +1,11 @@
-import model.{Section, TrainSection}
+import model.{Section, TrainId, TrainSection}
 
 package object actors {
   type Time = Long
 
   case class Tick(time: Time)
   case object GetStatus
-  case object Ticked
+  case class Ticked(time:Time, trainId:TrainId)
 
   sealed trait Status
   case object NotStarted extends Status

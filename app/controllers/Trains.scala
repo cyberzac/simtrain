@@ -49,7 +49,7 @@ object Trains {
       TrainSection(0, "SoTmö"), 
       TrainSection(1, "KeSo"), 
       TrainSection(4, "CstKe"), 
-      TrainSection(945, "CstCst"))
+      TrainSection(0, "CstCst"))
     ),
     Train(14, 465, List(
       TrainSection(3, "CstKe"), 
