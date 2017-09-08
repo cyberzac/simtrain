@@ -24,16 +24,17 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
   val log: Logger = Logger(this.getClass)
   implicit val timeout = Timeout(10 seconds)
 
+  val trains = Simulator.createTrains(system)
   for (time ← 0 to 400) {
     val tick = Tick(time)
 //    log.info(s"Doing a tick: $tick")
 
-    val futures = Simulator.createTrains(system) map (t ⇒ (t  ? tick).mapTo[Ticked])
+    val futures =  trains map (t ⇒ (t  ? tick).mapTo[Ticked])
     //    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
     //
     futures foreach (f ⇒ {
         f onComplete {
-          case Success(list) => log.info(s"$list")
+          case Success(_) => //log.info(s"$list")
           case Failure(t) => log.error(s"t", t)
         }
       Await.result(f, 10 second)
