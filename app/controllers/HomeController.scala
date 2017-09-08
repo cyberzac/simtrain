@@ -12,6 +12,7 @@ import akka.util.Timeout
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import model.{TrainSection ⇒ MTrainSection}
 
 /**
   * This controller creates an `Action` to handle HTTP requests to the
@@ -27,8 +28,8 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
   val sectionTwoActor = system.actorOf(SectionActor.props(section2))
 
   private val train: ActorRef = system.actorOf(TrainActor.props(4711, 3,
-    List(TrainSection(2, section1.id, sectionOneActor),
-      TrainSection(3, section2.id, sectionTwoActor))))
+    List(MTrainSection(2, section1.id, sectionOneActor),
+      MTrainSection(3, section2.id, sectionTwoActor))))
 
   implicit val timeout = Timeout(10 seconds)
 
