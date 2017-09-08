@@ -27,7 +27,7 @@ class SectionActor(section: Section) extends Actor with ActorLogging {
 
     case EnterSection(trainId) if free > 0 ⇒
       val nextFree = free - 1
-      log.info(s"train:$trainId entered section:${section.id} ($nextFree/${section.capacity})")
+      log.info(s"section:${section.id} train:$trainId enter  ($nextFree/${section.capacity})")
       sender() ! SectionEntered(section)
       if (nextFree == 0)
         context.become(blocked(Queue.empty))
@@ -36,7 +36,7 @@ class SectionActor(section: Section) extends Actor with ActorLogging {
 
     case ExitSection(trainId) ⇒
       val nextFree = free + 1
-      log.info(s"train:$trainId exited section:${section.id} ($nextFree/${section.capacity})")
+      log.info(s"section:${section.id} train:$trainId exited  ($nextFree/${section.capacity})")
       context.become(hasCapacity(nextFree))
 
     case x ⇒ log.error(s"Unexpected $x")
@@ -47,18 +47,20 @@ class SectionActor(section: Section) extends Actor with ActorLogging {
     case GetStatus ⇒ sender() ! SectionBlockedStatus(section, queue.size)
 
     case EnterSection(trainId) ⇒
-      log.info(s"section:${section.id} queuing train:$trainId")
-      context.become(blocked(queue enqueue QueuedTrain(trainId, sender())))
+      val newQueue = queue enqueue QueuedTrain(trainId, sender())
+      log.info(s"section:${section.id} train:$trainId queuing (-${newQueue.size}/${section.capacity})")
+      context.become(blocked(newQueue))
 
     case ExitSection(trainId) if queue.isEmpty ⇒
       val nextFree = 1
-      log.info(s"train:$trainId exited section:${section.id} ($nextFree/${section.capacity})")
+      log.info(s"section:${section.id} train:$trainId exited ($nextFree/${section.capacity})")
       context.become(hasCapacity(nextFree))
 
     case ExitSection(trainId) ⇒
       val (qt, newQueue) = queue.dequeue
       qt.train ! SectionEntered(section)
-      log.info(s"train:${qt.trainId} exited section:${section.id} (-${queue.size}/${section.capacity})")
+      log.info(s"section:${section.id} train:${qt.trainId} enter  (-${newQueue.size}/${section.capacity})")
+      log.info(s"section:${section.id} train:$trainId exited (-${newQueue.size}/${section.capacity})")
       context.become(blocked(newQueue))
 
     case x ⇒ log.error(s"Unexpected $x")
