@@ -43,7 +43,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       }
       "reply with NotStarted at time 1" in {
         dut ! Tick(0)
-        expectMsg(Ticked)
+        expectMsg(Ticked(0, 1))
         dut ! GetStatus
         expectMsg(NotStarted)
       }
@@ -68,7 +68,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         dut ! Tick(7)
         sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
-        expectMsg(Ticked)
+        expectMsg(Ticked(7, 3))
       }
     }
 
@@ -93,7 +93,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         globalClock += 1
         sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
-        expectMsg(Ticked)
+        expectMsg(Ticked(7, 5))
         dut ! GetStatus
         expectMsg(OnSection(trainSection2, trainSection2.time))
         advanceClockTo(10, dut)
@@ -111,7 +111,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         globalClock += 1
         sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
-        expectMsg(Ticked)
+        expectMsg(Ticked(7, 6))
         advanceClockTo(10, dut)
         dut ! GetStatus
         expectMsg(OnSection(trainSection2, 0))
@@ -128,7 +128,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
     while(globalClock < to ){
       globalClock += 1
       dut ! Tick(globalClock)
-      expectMsg(Ticked)
+      expectMsgAllClassOf(classOf[Ticked])
     }
   }
 }

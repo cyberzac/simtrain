@@ -2,17 +2,16 @@ package controllers
 
 import javax.inject._
 
-import actors.{SectionActor, Tick, TrainActor}
-import akka.actor.{ActorRef, ActorSystem}
-import model.{Section, TrainSection}
-import play.api._
-import play.api.mvc._
+import actors.{Tick, Ticked}
+import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
+import play.api._
+import play.api.mvc._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 /**
@@ -25,21 +24,35 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
   val log: Logger = Logger(this.getClass)
   implicit val timeout = Timeout(10 seconds)
 
-  for (time ← 0 to 10) {
+  for (time ← 0 to 400) {
     val tick = Tick(time)
-    log.info(s"Doing a tick: $tick")
+//    log.info(s"Doing a tick: $tick")
 
-    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
-
-    futures onComplete {
-      case Success(list) => {
-        log.info(s"$list")
-      }
-      case Failure(t) => log.error(s"t", t)
-    }
-
-   // Await.ready(futures, 10 seconds)
+    val futures = Simulator.createTrains(system) map (t ⇒ (t  ? tick).mapTo[Ticked])
+    //    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
+    //
+    futures foreach (f ⇒ {
+        f onComplete {
+          case Success(list) => log.info(s"$list")
+          case Failure(t) => log.error(s"t", t)
+        }
+      Await.result(f, 10 second)
+//      log.info(s"waited $r")
+    })
+//    waitAll(futures).map( r ⇒ log.info(s"$r"))
   }
+
+  // Await.ready(futures, 10 seconds)
+
+  import scala.util.{Failure, Success}
+
+  private def lift[T](futures: Seq[Future[T]]) =
+    futures.map(_.map {
+      Success(_)
+    }.recover { case t => Failure(t) })
+
+  def waitAll[T](futures: Seq[Future[T]]) =
+    Future.sequence(lift(futures)) // having neutralized exception completions through the lifting, .sequence can now be used
 
   /**
     * Create an Action to render an HTML page.

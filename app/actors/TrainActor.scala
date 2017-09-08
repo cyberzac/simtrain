@@ -13,6 +13,7 @@ object TrainActor {
 class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends Actor with ActorLogging {
   override def receive = {
     case GetStatus ⇒ sender() ! NotStarted
+
     case Tick(time) ⇒
       // log.info(s"train:$id: time is $time, start:$start")
       if (time == start) {
@@ -21,6 +22,8 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
         context.become(onSection(section.time, section, tail))
       }
       sender() ! Ticked(time, id)
+
+    case x ⇒ log.error(s"Unexpected initial: $x")
   }
 
 
@@ -43,15 +46,17 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       log.info(s"$time train:$id: ask ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
       context.become(waitForEntry(sender(), time, section, next, tail))
+
+    case x ⇒ log.error(s"Unexpected onSection: $x")
   }
 
-  def waitForEntry(ticker:ActorRef, time:Time, current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
+  def waitForEntry(ticker: ActorRef, time: Time, current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
     case GetStatus => sender() ! WaitingForEntry(current, next)
 
     case SectionEntered(_) =>
       log.info(s"$time train:$id: go ${current.sectionId} -> ${next.sectionId}")
       context.become(onSection(next.time, next, tail))
-      ticker! Ticked(time, id)
+      ticker ! Ticked(time, id)
 
     case SectionBlocked(_) ⇒
       log.info(s"$time train:$id: blocked ${current.sectionId} -> ${next.sectionId}")
@@ -61,11 +66,15 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       log.info(s"$newTime train:$id: waiting for ${current.sectionId} -> ${next.sectionId}")
       context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked(time, id)
+
+    case x ⇒ log.error(s"Unexpected waitForentry: $x")
   }
 
   def finalDestination(section: TrainSection): Receive = {
-    case GetStatus ⇒ sender() ! FinalDestination(section)
-    case Tick(time) => sender() ! Ticked(time, id)
+    case GetStatus ⇒
+      sender() ! FinalDestination(section)
+    case Tick(time) =>
+      sender() ! Ticked(time, id)
   }
 
 }
