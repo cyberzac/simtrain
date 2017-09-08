@@ -49,16 +49,16 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
     case GetStatus => sender() ! WaitingForEntry(current, next)
 
     case SectionEntered(_) =>
-      log.info(s"$time train:$id: go ${current.sectionId} to ${next.sectionId}")
+      log.info(s"$time train:$id: go ${current.sectionId} -> ${next.sectionId}")
       context.become(onSection(next.time, next, tail))
       ticker! Ticked
 
     case SectionBlocked(_) ⇒
-      log.info(s"$time train:$id: blocked ${current.sectionId} to ${next.sectionId}")
+      log.info(s"$time train:$id: blocked ${current.sectionId} -> ${next.sectionId}")
       ticker ! Ticked
 
     case Tick(newTime) =>
-      log.info(s"$newTime train:$id: waiting for ${current.sectionId} to ${next.sectionId}")
+      log.info(s"$newTime train:$id: waiting for ${current.sectionId} -> ${next.sectionId}")
       context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked
   }

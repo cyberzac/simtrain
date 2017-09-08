@@ -64,9 +64,11 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       "send enter section" in {
         val trainId = 3
         val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
-        advanceClockTo(7,dut)
+        advanceClockTo(6,dut)
+        dut ! Tick(7)
         sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
+        expectMsg(Ticked)
       }
     }
 
@@ -74,7 +76,9 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       val trainId = 4
       val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
       "return status" in {
-        advanceClockTo(8, dut)
+        advanceClockTo(6, dut)
+        dut ! Tick(7)
+        sectionActor2.expectMsg(EnterSection(trainId))
         dut ! GetStatus
         expectMsg(WaitingForEntry(trainSection1, trainSection2))
       }
@@ -84,13 +88,17 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       val trainId = 5
       val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
       "return status" in {
-        advanceClockTo(9, dut)
+        advanceClockTo(6, dut)
+        dut ! Tick(7)
+        globalClock += 1
+        sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
+        expectMsg(Ticked)
         dut ! GetStatus
         expectMsg(OnSection(trainSection2, trainSection2.time))
         advanceClockTo(10, dut)
         dut ! GetStatus
-        expectMsg(OnSection(trainSection2, trainSection2.time-1))
+        expectMsg(OnSection(trainSection2, 0))
       }
     }
 
@@ -98,13 +106,15 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
       val trainId = 6
       val dut = system.actorOf(TrainActor.props(trainId, startTime, trainSections))
       "return status" in {
-        advanceClockTo(9, dut)
+        advanceClockTo(6, dut)
+        dut ! Tick(7)
+        globalClock += 1
+        sectionActor2.expectMsg(EnterSection(trainId))
         dut ! SectionEntered(section2)
-        dut ! GetStatus
-        expectMsg(OnSection(trainSection2, trainSection2.time))
+        expectMsg(Ticked)
         advanceClockTo(10, dut)
         dut ! GetStatus
-        expectMsg(OnSection(trainSection2, trainSection2.time-1))
+        expectMsg(OnSection(trainSection2, 0))
         advanceClockTo(15, dut)
         dut ! GetStatus
         expectMsg(FinalDestination(trainSection2))
