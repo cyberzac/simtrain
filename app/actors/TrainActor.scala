@@ -18,8 +18,8 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       // log.info(s"train:$id: time is $time, start:$start")
       if (time == start) {
         val section :: tail = sections
-        log.info(s"$time train:$id: departure from ${section.sectionId}")
-        context.become(onSection(section.time, section, tail))
+        section.sectionActor ! EnterSection(id)
+        context.become(waitForEntry(sender(), time, None, section, tail))
       }
       sender() ! Ticked(time, id)
 
@@ -45,30 +45,40 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       val next :: tail = sections
       log.info(s"$time train:$id: ask ${section.sectionId} -> ${next.sectionId}")
       next.sectionActor ! EnterSection(id)
-      context.become(waitForEntry(sender(), time, section, next, tail))
+      context.become(waitForEntry(sender(), time, Some(section), next, tail))
 
     case x ⇒ log.error(s"Unexpected onSection: $x")
   }
 
-  def waitForEntry(ticker: ActorRef, time: Time, current: TrainSection, next: TrainSection, tail: List[TrainSection]): Receive = {
+  def waitForEntry(ticker: ActorRef, time: Time, current: Option[TrainSection], next: TrainSection, tail: List[TrainSection]): Receive = {
     case GetStatus => sender() ! WaitingForEntry(current, next)
 
     case SectionEntered(_) =>
-      log.info(s"$time train:$id: go ${current.sectionId} -> ${next.sectionId}")
-      current.sectionActor ! ExitSection(id)
+      current match {
+        case Some(section) ⇒
+          log.info(s"$time train:$id: go ${section.sectionId} -> ${next.sectionId}")
+          section.sectionActor ! ExitSection(id)
+        case None ⇒
+          log.info(s"$time train:$id: departure from ${next.sectionId}")
+
+      }
       context.become(onSection(next.time, next, tail))
       ticker ! Ticked(time, id)
 
     case SectionBlocked(_) ⇒
-      log.info(s"$time train:$id: blocked ${current.sectionId} -> ${next.sectionId}")
+      log.info(s"$time train:$id: blocked ${toSectionId(current)} -> ${next.sectionId}")
       ticker ! Ticked(time, id)
 
     case Tick(newTime) =>
-      log.info(s"$newTime train:$id: waiting for ${current.sectionId} -> ${next.sectionId}")
+      log.info(s"$newTime train:$id: waiting for ${toSectionId(current)} -> ${next.sectionId}")
       context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked(time, id)
 
     case x ⇒ log.error(s"Unexpected waitForentry: $x")
+  }
+
+  private def toSectionId(current: Option[TrainSection]) = {
+    (current map (_.sectionId)).getOrElse("")
   }
 
   def finalDestination(section: TrainSection): Receive = {
