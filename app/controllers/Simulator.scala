@@ -16,12 +16,12 @@ object Simulator {
     Trains.trains map(t => {
 
       val sections = t.sections map(tc => {
-        val actorRef = sectionMap.get(tc.sectionId).get
+        val actorRef = sectionMap(tc.sectionId)
         MTrainSection(tc.time, tc.sectionId, actorRef)
       })
 
 
-      system.actorOf(TrainActor.props(t.id, t.start, sections))
+      (t.id, system.actorOf(TrainActor.props(t.id, t.start, sections)))
     })
   }
 }

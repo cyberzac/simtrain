@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 
-import actors.{Tick, Ticked}
+import actors._
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
@@ -20,28 +20,43 @@ import scala.util.{Failure, Success}
   */
 @Singleton
 class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) extends AbstractController(cc) {
-
   val log: Logger = Logger(this.getClass)
-  implicit val timeout = Timeout(10 seconds)
 
-  val trains = Simulator.createTrains(system)
-  for (time ← 0 to 60*24*2) {
-    val tick = Tick(time)
-//    log.info(s"Doing a tick: $tick")
+  def simulate() = {
+    implicit val timeout = Timeout(10 seconds)
 
-    val futures =  trains map (t ⇒ (t  ? tick).mapTo[Ticked])
-    //    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
-    //
-    futures foreach (f ⇒ {
+    val trains = Simulator.createTrains(system)
+    for (time ← 0 to 60 * 24 * 2) {
+      val tick = Tick(time)
+      //    log.info(s"Doing a tick: $tick")
+
+      val futures = trains map (t ⇒ (t._2 ? tick).mapTo[Ticked])
+      //    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
+      //
+      futures foreach (f ⇒ {
         f onComplete {
           case Success(_) => //log.info(s"$list")
           case Failure(t) => log.error(s"t", t)
         }
-      Await.result(f, 10 second)
-//      log.info(s"waited $r")
+        Await.result(f, 10 seconds)
+        //      log.info(s"waited $r")
+      })
+      //    waitAll(futures).map( r ⇒ log.info(s"$r"))
+    }
+
+    // Collect results
+    val f2 = Future.sequence(trains map {
+      case (trainId, ref) ⇒
+        (ref ? GetStatus) map {
+          case FinalDestination(s, b) ⇒ (trainId, "final", s.sectionId, b)
+          case WaitingForEntry(_, next) ⇒ (trainId, "waiting", next.sectionId, -1)
+          case OnSection(current, _) ⇒ (trainId, "running", current.sectionId, -1)
+          case NotStarted ⇒ (trainId, "notStarted", "N/A", -1)
+        }
     })
-//    waitAll(futures).map( r ⇒ log.info(s"$r"))
+    Await.result(f2, 30 seconds)
   }
+
 
   // Await.ready(futures, 10 seconds)
 
@@ -63,6 +78,6 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
     * a path of `/`.
     */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    Ok(views.html.index(simulate()))
   }
 }

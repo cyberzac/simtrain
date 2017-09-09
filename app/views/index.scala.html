@@ -1,5 +1,18 @@
-@()
+@(data: List[(Long, String, String, Int)])
 
-@main("Welcome to Simtrain") {
-  <h1>Welcome to Simtrain!</h1>
-}
+  @main("Welcome to Simtrain") {
+    <h1>Welcome to Simtrain!</h1>
+    <table>
+      <tr><th>T&aring;g</th><th>Status</th><th>Sektion</th><th>F&ouml;rsening</th></tr>
+      @for(r ← data) {
+        <tr>
+          <td>@r._1</td>
+          <td>@r._2</td>
+          <td>@r._3</td>
+          <td>@r._4</td>
+        </tr>
+      }
+    </table>
+    <hr>
+  }
+

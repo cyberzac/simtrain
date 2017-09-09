@@ -22,7 +22,7 @@ object Simtrain extends App {
   for (time ← 0 to 60 * 24 * 2) {
     val tick = Tick(time)
     //    log.info(s"Doing a tick: $tick")
-    val futures = trains map (t ⇒ (t ? tick).mapTo[Ticked])
+    val futures = trains map (t ⇒ (t._2 ? tick).mapTo[Ticked])
     //    val futures: Future[List[Any]] = Future.sequence(Simulator.createTrains(system) map(_ ? tick))
     //
     futures foreach (f ⇒ {
