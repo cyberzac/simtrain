@@ -117,7 +117,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         expectMsg(OnSection(trainSection2, 0))
         advanceClockTo(15, dut)
         dut ! GetStatus
-        expectMsg(FinalDestination(trainSection2))
+        expectMsg(FinalDestination(trainSection2, 0))
 
       }
     }

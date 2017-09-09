@@ -11,6 +11,9 @@ object TrainActor {
 }
 
 class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends Actor with ActorLogging {
+
+  var totalBlocked = 0
+
   override def receive = {
     case GetStatus ⇒ sender() ! NotStarted
 
@@ -37,7 +40,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       sender() ! Ticked(time, id)
 
     case Tick(time) if sections.isEmpty ⇒
-      log.info(s"$time train:$id reached final destination ${section.sectionId}")
+      log.info(s"$time train:$id reached final destination ${section.sectionId} totalBlocked $totalBlocked")
       context.become(finalDestination(section))
       sender() ! Ticked(time, id)
 
@@ -66,10 +69,12 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
       ticker ! Ticked(time, id)
 
     case SectionBlocked(section, trains) ⇒
+      totalBlocked += 1
       log.warning(s"$time train:$id: blocked ${toSectionId(current)} -> ${next.sectionId}, trains:${trains.mkString(",")}")
       ticker ! Ticked(time, id)
 
     case Tick(newTime) =>
+      totalBlocked += 1
       log.warning(s"$newTime train:$id: waiting ${toSectionId(current)} -> ${next.sectionId}")
       context.become(waitForEntry(sender(), newTime, current, next, tail))
       sender() ! Ticked(time, id)
@@ -83,7 +88,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
 
   def finalDestination(section: TrainSection): Receive = {
     case GetStatus ⇒
-      sender() ! FinalDestination(section)
+      sender() ! FinalDestination(section, totalBlocked)
     case Tick(time) =>
       sender() ! Ticked(time, id)
   }
