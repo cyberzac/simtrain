@@ -49,7 +49,7 @@ class HomeController @Inject()(system: ActorSystem, cc: ControllerComponents) ex
       case (trainId, ref) ⇒
         (ref ? GetStatus) map {
           case FinalDestination(s, b) ⇒ (trainId, "final", s.sectionId, b)
-          case WaitingForEntry(_, next) ⇒ (trainId, "waiting", next.sectionId, -1)
+          case WaitingForEntry(_, next, b) ⇒ (trainId, "waiting", next.sectionId, b)
           case OnSection(current, _) ⇒ (trainId, "running", current.sectionId, -1)
           case NotStarted ⇒ (trainId, "notStarted", "N/A", -1)
         }

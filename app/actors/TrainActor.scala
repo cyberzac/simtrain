@@ -54,7 +54,7 @@ class TrainActor(id: TrainId, start: Time, sections: List[TrainSection]) extends
   }
 
   def waitForEntry(ticker: ActorRef, time: Time, current: Option[TrainSection], next: TrainSection, tail: List[TrainSection]): Receive = {
-    case GetStatus => sender() ! WaitingForEntry(current, next)
+    case GetStatus => sender() ! WaitingForEntry(current, next, totalBlocked)
 
     case SectionEntered(_) =>
       current match {

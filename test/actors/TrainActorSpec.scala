@@ -85,7 +85,7 @@ class TrainActorSpec(_system: ActorSystem) extends TestKit(_system) with Implici
         sectionActor1.expectMsg(EnterSection(trainId))
         dut ! GetStatus
         fishForMessage(200 millis, "onsection ") {
-          case WaitingForEntry(None, `trainSection1`) ⇒ true
+          case WaitingForEntry(None, `trainSection1`, _) ⇒ true
           case x ⇒
             log.info(s"got $x")
             false
